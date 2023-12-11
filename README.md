@@ -2,6 +2,53 @@
 
 [Jugalbandi API](https://api.jugalbandi.ai/docs) is a system of APIs that allows users to build Q&A style applications on their private and public datasets. The system creates Open API 3.0 specification endpoints using FastAPI.
 
+### Prerequisites
+
+- **Python 3.7 or higher**
+- Latest Docker
+
+### Postgres database setup in Docker
+
+1. To get the Postgres image, use the following command:
+
+```shell
+docker pull postgres:latest 
+```
+
+2. For the network, you can either use an existing network or create a new one by executing the following command:
+```shell
+docker network create sunbird-network
+```
+
+3. To create the Postgres instance, run the following command:
+
+```shell
+docker run --name=sunbird_postgres \
+		  --net sunbird-network \
+		  -e POSTGRES_PASSWORD=<postgres db password> \
+		  -e POSTGRES_USER=<postgres db username> \
+		  -e POSTGRES_DB=postgres \
+		  -p 5432:5432 \
+		  -d postgres:latest
+```
+
+### Morqo database setup in Docker
+
+1. To get the Morqo image, use the following command:
+
+```shell
+docker pull marqoai/marqo:latest
+```
+
+2. To create the Morqo instance, run the following command:
+
+```shell
+docker run --name marqo --privileged \
+  -p 8882:8882 \
+  --add-host host.docker.internal:host-gateway \
+  -d marqoai/marqo:latest
+```
+
 
 # 🔧 1. Installation
 
@@ -12,6 +59,10 @@ To use the code, you need to follow these steps:
     ```bash
     git clone https://github.com/DJP-Digital-Jaaduii-Pitara/sakhi-api-service.git
     ```
+   
+    ```
+   cd sakhi-api-service
+   ```
 
 2. The code requires **Python 3.7 or higher** and some additional python packages. To install these packages, run the following command in your terminal:
 
@@ -19,7 +70,18 @@ To use the code, you need to follow these steps:
     pip install -r requirements-dev.txt
     ```
 
-3. You will need a OCI account to store the audio file for response & marqo vector database for semantic similarity search.
+    To injest data to marqo
+
+    ```bash
+    mkdir data
+   ```
+
+    ```bash
+    python jadupitara_ingest_data.py
+   ```
+
+
+3. You will need a OCI account to store the audio file for response & indices in a bucket and to host a postgres connection to store the api logs.
 
 4. create another file **.env** which will hold the development credentials and add the following variables. Update the openai_api_key, OCI details, Bhashini endpoint URL and API key.
 

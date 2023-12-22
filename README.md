@@ -88,7 +88,8 @@ To use the code, you need to follow these steps:
     OCI_ACCESS_KEY_ID=<oracle_access_key_id>
     MARQO_URL=<your_marqo_db_url>
     MARQO_INDEX_NAME=<your_marqo_index_name>
-    TELEMETRY_ENDPOINT_URL=<telemetry_url>
+    TELEMETRY_ENDPOINT_URL=<telemetry_endpoint_url>
+    TELEMETRY_LOG_ENABLED=<telemetry_enable_or_disable> # true or false
     ```
 
 # 🏃🏻 2. Running

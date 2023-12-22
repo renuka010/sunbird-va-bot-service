@@ -1,6 +1,3 @@
-import json
-
-from fastapi import Request
 import requests
 import time
 import os

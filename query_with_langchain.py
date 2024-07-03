@@ -313,12 +313,12 @@ def get_formatted_documents(documents: List[Tuple[Document, Any]]):
     sources = ""
     for document, _ in documents:
         sources += f"> {document.page_content} \n"
-        if not document.metadata['file_url']:
+        if document.metadata.get('file_url') is None:
             sources += f"Source: {document.metadata['file_name']}"
         else:
             sources += f"Source: [{document.metadata['file_name']}]({document.metadata['file_url']})"
                  
-        if document.metadata['page_label']:
+        if document.metadata.get('page_label'):
             sources += f",  page# {document.metadata['page_label']};\n\n"
         else:
             sources +="\n\n"

@@ -22,15 +22,13 @@ class MarqoVectorStore(BaseVectorStore):
         self.collection_name = os.environ["VECTOR_COLLECTION_NAME"]
         self.embedding_model = os.environ["EMBEDDING_MODEL"]
         self.index_settings = {
-            "index_defaults": {
-                "treat_urls_and_pointers_as_images": False,
-                "model": self.embedding_model,
-                "normalize_embeddings": True,
-                "text_preprocessing": {
-                    "split_length": self.SPLIT_LENGTH,
-                    "split_overlap": self.SPLIT_OVERLAP,
-                    "split_method": "sentence"
-                }
+            "treatUrlsAndPointersAsImages": False,
+            "model": self.embedding_model,
+            "normalizeEmbeddings": True,
+            "textPreprocessing": {
+                "splitLength": self.SPLIT_LENGTH,
+                "splitOverlap": self.SPLIT_OVERLAP,
+                "splitMethod": "sentence"
             }
         }
 
@@ -84,6 +82,6 @@ class MarqoVectorStore(BaseVectorStore):
         return ids
 
     def similarity_search_with_score(self, query: str, collection_name: str, k: int = 20) -> List[Tuple[Document, float]]:
-        docsearch = Marqo(self.client, index_name=collection_name, searchable_attributes=["text"])
+        docsearch = Marqo(self.client, index_name=collection_name)
         documents = docsearch.similarity_search_with_score(query, k)
         return documents

@@ -82,6 +82,32 @@ class MarqoVectorStore(BaseVectorStore):
         return ids
 
     def similarity_search_with_score(self, query: str, collection_name: str, k: int = 20) -> List[Tuple[Document, float]]:
-        docsearch = Marqo(self.client, index_name=collection_name)
-        documents = docsearch.similarity_search_with_score(query, k)
-        return documents
+        try:
+            docsearch = Marqo(self.client, index_name=collection_name)
+            documents = docsearch.similarity_search_with_score(query, k)
+            return documents
+        except Exception as e:
+            return []
+    
+    def cache_documents(self, document: Document, collection_name:str) -> str:
+        try:
+            self.client.create_index(collection_name, settings_dict=self.index_settings)
+            print(f"{collection_name} Index created")
+        except Exception as e:
+            print(f"{collection_name} Index already exists")
+
+        documents: List[Dict[str, str]] = []
+        documents.append({
+            "text": document.page_content,
+            "metadata": json.dumps(document.metadata)
+        })
+        response = self.client.index(collection_name).add_documents(documents=documents,
+                                                         tensor_fields=self.TENSOR_FIELDS)
+        if response["errors"]:
+            err_msg = (
+                f"Error in uploading cache in index range {collection_name}"
+                f"check Marqo logs."
+            )
+            raise RuntimeError(err_msg)
+        ids = response["items"][0]["_id"]
+        return ids

@@ -55,3 +55,7 @@ def convert_chat_messages(messages: Sequence[Dict[str, Any]]) -> List[BaseMessag
         List of LangChain BaseMessage objects.
     """
     return [convert_dict_to_message(m) for m in messages]
+
+def prepare_redis_cache_key(context:str, query:str) -> str:
+    key = context+"_cache_"+query
+    return key

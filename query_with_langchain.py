@@ -11,7 +11,7 @@ from env_manager import llm_class, vectorstore_class
 from utils import convert_chat_messages, get_from_env_or_config
 from logger import logger
 from redis_util import read_messages_from_redis, store_messages_in_redis
-from index_documents_cache import store_cache_in_marqo, search_cache_in_marqo
+from index_documents_cache import store_response_in_cache, search_query_in_cache
 
 load_dotenv()
 temperature = float(get_from_env_or_config("llm", "temperature"))
@@ -20,12 +20,12 @@ max_messages = int(get_from_env_or_config("llm", "max_messages")) # Maximum numb
 
 
 def querying_with_langchain_gpt3(index_id, query, context):
-    cache_response = search_cache_in_marqo(query, context)
+    cache_response = search_query_in_cache(query, context)
     if cache_response:
         return cache_response, None, 200
     intent_response = check_bot_intent(query, context)
     if intent_response:
-        store_cache_in_marqo(query, intent_response, context)
+        store_response_in_cache(query, intent_response, context)
         return intent_response, None, 200
     
     try:
@@ -58,7 +58,7 @@ def querying_with_langchain_gpt3(index_id, query, context):
         # )
         # logger.info({"label": "llm_response", "response": response})
         # return response.strip(";"), None, 200
-        store_cache_in_marqo(query, contexts, context)
+        store_response_in_cache(query, contexts, context)
         return contexts, None, 200
     except Exception as e:
         error_message = str(e.__context__) + " and " + e.__str__()
@@ -67,12 +67,12 @@ def querying_with_langchain_gpt3(index_id, query, context):
     return "", error_message, status_code
 
 def conversation_retrieval_chain(index_id, query, session_id, context):
-    cache_response = search_cache_in_marqo(query, context)
+    cache_response = search_query_in_cache(query, context)
     if cache_response:
         return cache_response, None, 200
     intent_response = check_bot_intent(query, context)
     if intent_response:
-        store_cache_in_marqo(query, intent_response, context)
+        store_response_in_cache(query, intent_response, context)
         return intent_response, None, 200
     
     try:
@@ -89,7 +89,7 @@ def conversation_retrieval_chain(index_id, query, session_id, context):
         logger.debug(f"intent_payload :: {intent_payload}")
         search_intent = get_intent_query(intent_payload)
         logger.info(f"search_intent :: {search_intent}")
-        cache_response = search_cache_in_marqo(query, context)
+        cache_response = search_query_in_cache(query, context)
         if cache_response:
             return cache_response, None, 200
         documents = vectorstore_class.similarity_search_with_score(search_intent, index_id, k=20)
@@ -115,7 +115,7 @@ def conversation_retrieval_chain(index_id, query, session_id, context):
         # messages.extend([user_message,assistant_message])
         # store_messages_in_redis(session_id, messages)
         # return response.strip(";"), None, 200
-        store_cache_in_marqo(search_intent, intent_response, context)
+        store_response_in_cache(search_intent, intent_response, context)
         return contexts, None, 200
     except Exception as e:
         error_message = str(e.__context__) + " and " + e.__str__()

@@ -28,3 +28,11 @@ def read_messages_from_redis(key):
         return pickle.loads(decompressed_data)
     else:
         return []  # Handle the case where the key doesn't exis
+    
+def store_response_in_redis(key, response):
+    redis_client.set(key, response)
+
+def read_response_from_redis(key):
+    response = redis_client.get(key)
+    return response
+    

@@ -28,7 +28,7 @@ class MarqoVectorStore(BaseVectorStore):
             "textPreprocessing": {
                 "splitLength": self.SPLIT_LENGTH,
                 "splitOverlap": self.SPLIT_OVERLAP,
-                "splitMethod": "sentence"
+                "splitMethod": "passage"
             }
         }
 

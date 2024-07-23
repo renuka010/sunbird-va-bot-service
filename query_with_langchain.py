@@ -25,6 +25,7 @@ def querying_with_langchain_gpt3(index_id, query, context):
         return cache_response, None, 200
     intent_response = check_bot_intent(query, context)
     if intent_response:
+        logger.info({"Retrieval method ": "Retrived from LLM Call"})
         store_response_in_cache(query, intent_response, context)
         return intent_response, None, 200
     
@@ -47,19 +48,19 @@ def querying_with_langchain_gpt3(index_id, query, context):
         if not documents or not contexts:
             return "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question.", None, 200
 
-        # system_rules = system_rules.format(contexts=contexts)
-        # logger.debug("==== System Rules ====")
-        # logger.debug(f"System Rules : {system_rules}")
-        # response = call_chat_model(
-        #     messages=[
-        #         {"role": "system", "content": system_rules},
-        #         {"role": "user", "content": query}
-        #     ]
-        # )
-        # logger.info({"label": "llm_response", "response": response})
-        # return response.strip(";"), None, 200
-        store_response_in_cache(query, contexts, context)
-        return contexts, None, 200
+        system_rules = system_rules.format(contexts=contexts)
+        logger.debug("==== System Rules ====")
+        logger.debug(f"System Rules : {system_rules}")
+        response = call_chat_model(
+            messages=[
+                {"role": "system", "content": system_rules},
+                {"role": "user", "content": query}
+            ]
+        )
+        logger.info({"label": "llm_response", "response": response})
+        logger.info({"Retrieval method ": "Retrived from LLM Call"})
+        store_response_in_cache(query, response, context)
+        return response.strip(";"), None, 200
     except Exception as e:
         error_message = str(e.__context__) + " and " + e.__str__()
         status_code = 500
@@ -67,11 +68,9 @@ def querying_with_langchain_gpt3(index_id, query, context):
     return "", error_message, status_code
 
 def conversation_retrieval_chain(index_id, query, session_id, context):
-    cache_response = search_query_in_cache(query, context)
-    if cache_response:
-        return cache_response, None, 200
     intent_response = check_bot_intent(query, context)
     if intent_response:
+        logger.info({"Retrieval method ": "Retrived from LLM Call"})
         store_response_in_cache(query, intent_response, context)
         return intent_response, None, 200
     
@@ -103,20 +102,20 @@ def conversation_retrieval_chain(index_id, query, session_id, context):
         if not documents or not contexts:
             return "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question.", None, 200
 
-        # system_rules = system_rules.format(contexts=contexts)
-        # system_rules = {"role": "system", "content": system_rules}
-        # logger.debug(f"System Rules : {system_rules}")
-        # message_payload  = create_payload_by_message_count(user_message,system_rules,formatted_messages,max_messages=max_messages)
-        # logger.debug(f"message_payload :: {message_payload}")
-        # response = call_chat_model(message_payload)
-        # logger.info({"label": "llm_response", "response": response})
-        # assistant_message = format_assistant_message(response.strip(";"))
-        # messages = read_messages_from_redis(session_id)
-        # messages.extend([user_message,assistant_message])
-        # store_messages_in_redis(session_id, messages)
-        # return response.strip(";"), None, 200
-        store_response_in_cache(search_intent, intent_response, context)
-        return contexts, None, 200
+        system_rules = system_rules.format(contexts=contexts)
+        system_rules = {"role": "system", "content": system_rules}
+        logger.debug(f"System Rules : {system_rules}")
+        message_payload  = create_payload_by_message_count(user_message,system_rules,formatted_messages,max_messages=max_messages)
+        logger.debug(f"message_payload :: {message_payload}")
+        response = call_chat_model(message_payload)
+        logger.info({"label": "llm_response", "response": response})
+        assistant_message = format_assistant_message(response.strip(";"))
+        messages = read_messages_from_redis(session_id)
+        messages.extend([user_message,assistant_message])
+        store_messages_in_redis(session_id, messages)
+        logger.info({"Retrieval method ": "Retrived from LLM Call"})
+        store_response_in_cache(search_intent, response, context)
+        return response.strip(";"), None, 200
     except Exception as e:
         error_message = str(e.__context__) + " and " + e.__str__()
         status_code = 500

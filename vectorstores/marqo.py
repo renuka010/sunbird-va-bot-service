@@ -92,9 +92,8 @@ class MarqoVectorStore(BaseVectorStore):
     def cache_documents(self, document: Document, collection_name:str) -> str:
         try:
             self.client.create_index(collection_name, settings_dict=self.index_settings)
-            print(f"Marqo {collection_name} Index created")
         except Exception as e:
-            print(f"Marqo {collection_name} Index already exists")
+            pass
 
         documents: List[Dict[str, str]] = []
         documents.append({

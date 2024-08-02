@@ -43,7 +43,7 @@ def querying_with_langchain_gpt3(index_id, query, context):
         min_score = get_from_env_or_config("database", "docs_min_score", None)
         filtered_document = get_score_filtered_documents(documents, float(min_score))
         filtered_document = filtered_document[:int(top_docs_to_fetch)]
-        logger.info(f"Score filtered documents : {str(filtered_document)}")
+        logger.info({"Score filtered documents" : "Documents retrieved"})
         contexts = get_formatted_documents(filtered_document)
         if not documents or not contexts:
             return "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question.", None, 200
@@ -57,7 +57,6 @@ def querying_with_langchain_gpt3(index_id, query, context):
                 {"role": "user", "content": query}
             ]
         )
-        logger.info({"label": "llm_response", "response": response})
         logger.info({"Retrieval method ": "Retrived from LLM Call"})
         store_response_in_cache(query, response, context)
         return response.strip(";"), None, 200
@@ -97,7 +96,7 @@ def conversation_retrieval_chain(index_id, query, session_id, context):
         filtered_document = get_score_filtered_documents(documents, float(min_score))
         top_docs_to_fetch = get_from_env_or_config("database", "top_docs_to_fetch", None)
         filtered_document = filtered_document[:int(top_docs_to_fetch)]
-        logger.info(f"Score filtered documents : {str(filtered_document)}")
+        logger.info({"Score filtered documents" : "Documents retrieved"})
         contexts = get_formatted_documents(filtered_document)
         if not documents or not contexts:
             return "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question.", None, 200
@@ -108,7 +107,6 @@ def conversation_retrieval_chain(index_id, query, session_id, context):
         message_payload  = create_payload_by_message_count(user_message,system_rules,formatted_messages,max_messages=max_messages)
         logger.debug(f"message_payload :: {message_payload}")
         response = call_chat_model(message_payload)
-        logger.info({"label": "llm_response", "response": response})
         assistant_message = format_assistant_message(response.strip(";"))
         messages = read_messages_from_redis(session_id)
         messages.extend([user_message,assistant_message])

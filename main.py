@@ -147,7 +147,7 @@ async def query(request: QueryModel, x_request_id: str = Header(None, alias="X-R
         answer, error_message, status_code = querying_with_langchain_gpt3(index_id, text, context)
         if len(answer) != 0:
             regional_answer, error_message = process_outgoing_text(answer, language)
-            logger.info({"query regional_answer": regional_answer})
+            logger.info({"Regional_answer conversion": "Completed"})
             if regional_answer is not None:
                 if is_audio:
                     output_file, error_message = process_outgoing_voice(regional_answer, language)
@@ -171,7 +171,6 @@ async def query(request: QueryModel, x_request_id: str = Header(None, alias="X-R
         raise HTTPException(status_code=status_code, detail=error_message)
 
     response = ResponseForQuery(input=QueryInputModel(language=language, text=query_text, context=context), output=OutputResponse(text=regional_answer, audio=audio_output_url, language=language, format=output_format))
-    logger.info({"x_request_id": x_request_id, "query": query_text, "text": text, "response": response})
     return response
 
 
@@ -215,7 +214,7 @@ async def chat(request: QueryModel, x_request_id: str = Header(None, alias="X-Re
         answer, error_message, status_code = conversation_retrieval_chain(index_id, text, redis_session_id, context)
         if len(answer) != 0:
             regional_answer, error_message = process_outgoing_text(answer, language)
-            logger.info({"chat regional_answer": regional_answer})
+            logger.info({"Regional_answer conversion": "Completed"})
             if regional_answer is not None:
                 if is_audio:
                     output_file, error_message = process_outgoing_voice(regional_answer, language)
@@ -239,5 +238,4 @@ async def chat(request: QueryModel, x_request_id: str = Header(None, alias="X-Re
         raise HTTPException(status_code=status_code, detail=error_message)
 
     response = ResponseForQuery(input=QueryInputModel(language=language, text=query_text, context=context), output=OutputResponse(text=regional_answer, audio=audio_output_url, language=language, format=output_format))
-    logger.info({"x_request_id": x_request_id, "query": query_text, "text": text, "response": response})
     return response

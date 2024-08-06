@@ -30,9 +30,17 @@ def read_messages_from_redis(key):
         return []  # Handle the case where the key doesn't exis
     
 def store_response_in_redis(key, response):
-    redis_client.set(key, response)
+    mapping = {
+        'response': response,
+        'access_count': 0,
+    }
+    redis_client.hset(name=key, mapping=mapping)
 
 def read_response_from_redis(key):
-    response = redis_client.get(key)
-    return response
+    try:
+        redis_client.hincrby(key, 'access_count', 1)
+        response = redis_client.hget(key, 'response')
+        return response
+    except Exception:
+        return None
     

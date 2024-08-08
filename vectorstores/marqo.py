@@ -89,17 +89,12 @@ class MarqoVectorStore(BaseVectorStore):
         except Exception as e:
             return []
     
-    def cache_documents(self, document: Document, collection_name:str) -> str:
+    def cache_documents(self, documents: List[Dict[str, str]], collection_name:str) -> str:
         try:
             self.client.create_index(collection_name, settings_dict=self.index_settings)
         except Exception as e:
             pass
 
-        documents: List[Dict[str, str]] = []
-        documents.append({
-            "text": document.page_content,
-            "metadata": json.dumps(document.metadata)
-        })
         response = self.client.index(collection_name).add_documents(documents=documents,
                                                          tensor_fields=self.TENSOR_FIELDS)
         if response["errors"]:
@@ -108,5 +103,6 @@ class MarqoVectorStore(BaseVectorStore):
                 f"check Marqo logs."
             )
             raise RuntimeError(err_msg)
-        ids = response["items"][0]["_id"]
+        ids = []
+        ids += [item["_id"] for item in response["items"]]
         return ids

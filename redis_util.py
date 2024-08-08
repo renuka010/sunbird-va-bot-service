@@ -40,7 +40,26 @@ def read_response_from_redis(key):
     try:
         redis_client.hincrby(key, 'access_count', 1)
         response = redis_client.hget(key, 'response')
-        return response
-    except Exception:
+        return response.decode('utf-8')
+    except Exception as e:
+        print(e)
         return None
     
+def get_cache_data_from_redis(context):
+    """Retrieves frequently asked queries and responses from Redis based on context"""
+    pattern = f'{context}_cache_*'
+    pattern_length = len(pattern)-1
+    pattern = pattern.encode('utf-8')
+    matches = []
+
+    for key in redis_client.scan_iter(match=pattern):
+        decoded_key = key.decode('utf-8')
+        query = decoded_key[pattern_length:]
+        try:
+            access_count = int(redis_client.hget(key, 'access_count'))
+            if (access_count > 10):
+                response = redis_client.hget(decoded_key, 'response').decode('utf-8')
+                matches.append((query, response))
+        except Exception as e:
+            pass
+    return matches

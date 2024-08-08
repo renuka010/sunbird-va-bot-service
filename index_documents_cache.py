@@ -1,9 +1,9 @@
 import json
 from typing import (
+    Dict,
     List
 )
 from env_manager import vectorstore_class
-from langchain.docstore.document import Document
 from utils.env import get_from_env_or_config
 from utils.utils import prepare_redis_cache_key
 from redis_util import store_response_in_redis, read_response_from_redis
@@ -11,13 +11,16 @@ from faiss_indexer import FaissIndexer
 from logger import logger
  
 def store_response_in_cache(query: str, response: str, context:str):
-    document = Document(page_content=query,
-                          metadata={
-                              "response": response
-                            })
+    documents: List[Dict[str, str]] = []
+    documents.append({
+        "text": query,
+        "metadata": json.dumps({
+                        "response": response
+                    })
+    })
     indices_cached = json.loads(get_from_env_or_config('database', 'indices_cached', None))
     index_id = indices_cached.get(context.lower())
-    result = vectorstore_class.cache_documents(document, index_id)
+    result = vectorstore_class.cache_documents(documents, index_id)
     logger.info({"Marqo Cache status": "Success"})
 
     redis_key = prepare_redis_cache_key(context, query)

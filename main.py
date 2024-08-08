@@ -10,6 +10,7 @@ from io_processing import *
 from query_with_langchain import *
 from telemetry_middleware import TelemetryMiddleware
 from utils import is_url, is_base64, prepare_redis_key
+from scheduler import start_scheduler, shutdown_scheduler
 
 app = FastAPI(
     title="Sakhi API Service",
@@ -32,6 +33,8 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     logger.info('Invoking startup_event')
+    start_scheduler()
+    logger.info('Scheduler : Started')
     load_dotenv()
     logger.info('startup_event : Engine created')
 
@@ -39,6 +42,8 @@ async def startup_event():
 @app.on_event("shutdown")
 async def shutdown_event():
     logger.info('Invoking shutdown_event')
+    shutdown_scheduler()
+    logger.info('Scheduler : Shutdown completed')
     logger.info('shutdown_event : Engine closed')
 
 

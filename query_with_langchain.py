@@ -46,7 +46,9 @@ def querying_with_langchain_gpt3(index_id, query, context):
         logger.info({"Score filtered documents" : "Documents retrieved"})
         contexts = get_formatted_documents(filtered_document)
         if not documents or not contexts:
-            return "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question.", None, 200
+            response = "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question."
+            store_response_in_cache(query, response, context)
+            return response, None, 200
 
         system_rules = system_rules.format(contexts=contexts)
         logger.debug("==== System Rules ====")
@@ -99,8 +101,10 @@ def conversation_retrieval_chain(index_id, query, session_id, context):
         logger.info({"Score filtered documents" : "Documents retrieved"})
         contexts = get_formatted_documents(filtered_document)
         if not documents or not contexts:
-            return "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question.", None, 200
-
+            response = "I'm sorry, but I am not currently trained with relevant documents to provide a specific answer for your question."
+            store_response_in_cache(query, response, context)
+            return response, None, 200
+        
         system_rules = system_rules.format(contexts=contexts)
         system_rules = {"role": "system", "content": system_rules}
         logger.debug(f"System Rules : {system_rules}")
